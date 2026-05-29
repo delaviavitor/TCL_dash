@@ -281,14 +281,14 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
     // Build lookup por CNPJ limpo
     var lookup={};
     if(stores){
-      // Colunas: 0=CNPJ, 1=Bandeira, 2=DESCRICAO LOCAL, 3=UF, 4=Cidade
+      // Colunas: 0=CNPJ, 1=Bandeira, 2=DESCRICAO LOCAL, 3=CIDADE, 4=UF
       stores.rows.forEach(function(r){
         var k = cleanCNPJ(r[0]);
         if(k) lookup[k]={
-          rede: (r[1]||"").trim(),
-          nome: (r[2]||"").trim(),
-          uf:   (r[3]||"").trim(),
-          cidade:(r[4]||"").trim()
+          rede:  (r[1]||"").trim(),
+          nome:  (r[2]||"").trim(),
+          cidade:(r[3]||"").trim(),
+          uf:    (r[4]||"").trim()
         };
       });
     }
