@@ -293,6 +293,10 @@ function render(rows){
   var cobLookup = window._cobLookup||{};
   var redesP7L = countKey(rowsComP7L,"_rede").filter(function(e){return e[1]>0;});
   if(redesP7L.length) buildRedeCobertura(grid, redesP7L, cobLookup);
+
+  // Grafico por UF — apenas quem recebeu P7L
+  var ufsP7L = countKey(rowsComP7L,"_uf").filter(function(e){return e[0]&&e[0].trim()!==""&&e[1]>0;});
+  if(ufsP7L.length) buildHBar(grid,"Positivacao por Estado (UF)","lojas com P7L por estado",ufsP7L);
   var priority=[COLS.recebeu,COLS.modelo,COLS.exposto,COLS.sku].filter(function(i){return i>=0;});
   var rest=ALL_HEADERS.map(function(_,i){return i;}).filter(function(i){return priority.indexOf(i)<0;});
   var ord=priority.concat(rest).slice(0,9);
