@@ -208,7 +208,7 @@ function buildHBar(grid,title,sub,entries){
 
 var ALL_ROWS=[],ALL_HEADERS=[],COLS={};
 var fUf="",fRede="",fModelo="",fSku="";
-function getFiltered(){return ALL_ROWS.filter(function(r){return(fRede===""||( r._rede||"")===fRede)&&(fModelo===""||COLS.modelo<0||(r[COLS.modelo]||"").trim()===fModelo)&&(fSku===""||COLS.sku<0||(r[COLS.sku]||"").trim()===fSku);});}
+function getFiltered(){return ALL_ROWS.filter(function(r){return(fUf===""||( r._uf||"").trim()===fUf.trim())&&(fRede===""||( r._rede||"")===fRede)&&(fModelo===""||COLS.modelo<0||(r[COLS.modelo]||"").trim()===fModelo)&&(fSku===""||COLS.sku<0||(r[COLS.sku]||"").trim()===fSku);});}
 function populateSel(id,entries){var s=document.getElementById(id);entries.forEach(function(e){var o=document.createElement("option");o.value=e[0];o.textContent=e[0]+" ("+e[1]+")";s.appendChild(o);});}
 function clearFilters(){fUf=fRede=fModelo=fSku="";["f-uf","f-rede","f-modelo","f-sku"].forEach(function(id){document.getElementById(id).value="";});refresh();}
 function updateFinfo(){var p=[];if(fUf)p.push("UF: "+fUf);if(fRede)p.push("Rede: "+fRede);if(fModelo)p.push("Modelo: "+fModelo);if(fSku)p.push("Local: "+fSku);var el=document.getElementById("finfo");el.style.display=p.length?"flex":"none";el.textContent=p.join(" · ");}
@@ -238,8 +238,8 @@ function buildRedeCobertura(grid, redesP7L, cobLookup) {
     data:{
       labels:labels,
       datasets:[
-        {label:"Total cobertura",data:total,backgroundColor:"rgba(0,0,0,0.08)",borderColor:"rgba(0,0,0,0.15)",borderWidth:1,borderRadius:4},
-        {label:"Com P7L",data:posit,backgroundColor:"#FF0000CC",borderColor:"#FF0000",borderWidth:1.5,borderRadius:4}
+        {label:"Total cobertura",data:total,backgroundColor:"rgba(0,0,0,0.10)",borderColor:"rgba(0,0,0,0.15)",borderWidth:1,borderRadius:4,barPercentage:0.85,categoryPercentage:0.8},
+        {label:"Com P7L",data:posit,backgroundColor:"#FF0000CC",borderColor:"#FF0000",borderWidth:1.5,borderRadius:4,barPercentage:0.5,categoryPercentage:0.8}
       ]
     },
     options:{
@@ -256,8 +256,8 @@ function buildRedeCobertura(grid, redesP7L, cobLookup) {
         }}}
       },
       scales:{
-        x:{stacked:false,grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},
-        y:{stacked:true,grid:{display:false},border:{display:false}}
+        x:{grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},
+        y:{grid:{display:false},border:{display:false}}
       }
     }
   }));
