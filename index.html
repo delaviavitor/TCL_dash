@@ -213,6 +213,62 @@ function populateSel(id,entries){var s=document.getElementById(id);entries.forEa
 function clearFilters(){fUf=fRede=fModelo=fSku="";["f-uf","f-rede","f-modelo","f-sku"].forEach(function(id){document.getElementById(id).value="";});refresh();}
 function updateFinfo(){var p=[];if(fUf)p.push("UF: "+fUf);if(fRede)p.push("Rede: "+fRede);if(fModelo)p.push("Modelo: "+fModelo);if(fSku)p.push("Local: "+fSku);var el=document.getElementById("finfo");el.style.display=p.length?"flex":"none";el.textContent=p.join(" · ");}
 
+
+function buildRedeCobertura(grid, redesP7L, cobLookup) {
+  // Merge: para cada rede com P7L, pega o total do cobLookup
+  var labels=[], posit=[], total=[];
+  redesP7L.forEach(function(e){
+    var rede=e[0], p=e[1], t=cobLookup[rede]||0;
+    if(p>0){
+      labels.push(rede);
+      posit.push(p);
+      total.push(t);
+    }
+  });
+  // Also add redes that are in cobLookup but not in redesP7L (0 positivadas)
+  Object.keys(cobLookup).forEach(function(rede){
+    if(labels.indexOf(rede)<0 && cobLookup[rede]>0){
+      labels.push(rede);
+      posit.push(0);
+      total.push(cobLookup[rede]);
+    }
+  });
+
+  if(!labels.length) return;
+  var card=document.createElement("div");card.className="cc";
+  card.innerHTML='<div class="cctitle">Positivacao por Rede</div><div class="ccsub">SKU recebido vs total de lojas na cobertura</div>';
+  var h=Math.max(260,labels.length*52+80);
+  var nc=newCanvas(h);card.appendChild(nc.w);grid.appendChild(card);
+  charts.push(new Chart(nc.c,{
+    type:"bar",
+    data:{
+      labels:labels,
+      datasets:[
+        {label:"Total cobertura",data:total,backgroundColor:"rgba(0,0,0,0.10)",borderColor:"rgba(0,0,0,0.25)",borderWidth:1.5,borderRadius:4},
+        {label:"Com P7L",data:posit,backgroundColor:"#FF000099",borderColor:"#FF0000",borderWidth:1.5,borderRadius:4}
+      ]
+    },
+    options:{
+      indexAxis:"y",responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
+        tooltip:{callbacks:{label:function(ctx){
+          if(ctx.datasetIndex===1){
+            var t2=total[ctx.dataIndex];
+            var pct2=t2>0?Math.round(ctx.raw/t2*100):0;
+            return " "+ctx.raw+" positivadas ("+pct2+"% de "+t2+")";
+          }
+          return " "+ctx.raw+" lojas na cobertura";
+        }}}
+      },
+      scales:{
+        x:{grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},
+        y:{grid:{display:false},border:{display:false}}
+      }
+    }
+  }));
+}
+
 function render(rows){
   var total=rows.length; updateFinfo();
   var sh='<div class="sc blue"><div class="sclabel">Total</div><div class="scvalue">'+total.toLocaleString("pt-BR")+'</div><div class="scsub">'+(fRede||fModelo||fSku?"filtrado de "+ALL_ROWS.length:ALL_HEADERS.length+" colunas")+'</div></div>';
@@ -228,20 +284,6 @@ function render(rows){
   var redes=countKey(rows,"_rede");
   if(redes.length)sh+='<div class="sc purple"><div class="sclabel">Redes</div><div class="scvalue">'+redes.length+'</div><div class="scsub">identificadas</div></div>';
 
-  // Cobertura cards por rede
-  var cobLookup = window._cobLookup||{};
-  var redesComMeta = Object.keys(cobLookup);
-  if(redesComMeta.length){
-    redesComMeta.forEach(function(rede){
-      var total = cobLookup[rede];
-      var posit = rows.filter(function(r){
-        return (r._rede||"")=== rede && COLS.recebeu>=0 && (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;
-      }).length;
-      var p = total>0?Math.round(posit/total*100):0;
-      var cor = p>=50?"green":p>=25?"amber":"red";
-      sh+='<div class="sc '+cor+'"><div class="sclabel">'+rede+'</div><div class="scvalue">'+p+'%</div><div class="scsub">'+posit+' de '+total+' lojas</div></div>';
-    });
-  }
   document.getElementById("strip").innerHTML=sh;
   destroyCharts();var grid=document.getElementById("cgrid");grid.innerHTML="";
   if(COLS.recebeu>=0)buildDonut(grid,"A loja ja recebeu o P7L?",total+" respostas",countCol(rows,COLS.recebeu),total);
@@ -252,10 +294,11 @@ function render(rows){
     buildDonut(grid,"O modelo esta exposto em loja?",baseT+" lojas com P7L",countCol(rows,COLS.exposto),baseT);
   }
   if(COLS.sku>=0)    buildHBar(grid,"O SKU esta positivado em qual lugar?","por local",countCol(rows,COLS.sku));
-  // Respostas por Rede — apenas quem recebeu P7L
+  // Respostas por Rede — barras duplas: positivadas vs total cobertura
   var rowsComP7L = COLS.recebeu>=0 ? rows.filter(function(r){return (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;}) : rows;
-  var redesP7L = countKey(rowsComP7L,"_rede");
-  if(redesP7L.length) buildHBar(grid,"Respostas por Rede (SKU Recebido)","apenas lojas que receberam o P7L",redesP7L);
+  var cobLookup = window._cobLookup||{};
+  var redesP7L = countKey(rowsComP7L,"_rede").filter(function(e){return e[1]>0;});
+  if(redesP7L.length) buildRedeCobertura(grid, redesP7L, cobLookup);
   var priority=[COLS.recebeu,COLS.modelo,COLS.exposto,COLS.sku].filter(function(i){return i>=0;});
   var rest=ALL_HEADERS.map(function(_,i){return i;}).filter(function(i){return priority.indexOf(i)<0;});
   var ord=priority.concat(rest).slice(0,9);
