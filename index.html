@@ -265,7 +265,7 @@ function buildRedeCobertura(grid, redesP7L, cobLookup) {
 
 function render(rows){
   var total=rows.length; updateFinfo();
-  var sh='<div class="sc blue"><div class="sclabel">Total</div><div class="scvalue">'+total.toLocaleString("pt-BR")+'</div><div class="scsub">'+(fRede||fModelo||fSku?"filtrado de "+ALL_ROWS.length:ALL_HEADERS.length+" colunas")+'</div></div>';
+  var sh='<div class="sc blue"><div class="sclabel">Total</div><div class="scvalue">'+total.toLocaleString("pt-BR")+'</div><div class="scsub">'+(fUf||fRede||fModelo||fSku?"filtrado de "+ALL_ROWS.length:ALL_HEADERS.length+" colunas")+'</div></div>';
   if(COLS.recebeu>=0){var e1=countCol(rows,COLS.recebeu),s1=e1.find(function(x){return x[0].toLowerCase().indexOf("sim")>=0;}),p1=s1?pct(s1[1],total):0;sh+='<div class="sc '+(p1>=50?"green":"red")+'"><div class="sclabel">Lojas com P7L</div><div class="scvalue">'+p1+'%</div><div class="scsub">'+(s1?s1[1]:0)+' de '+total+'</div></div>';}
   if(COLS.exposto>=0){
     // Base = lojas que receberam o P7L (sim)
@@ -299,9 +299,6 @@ function render(rows){
   var ufsP7L = countKey(rowsComP7L,"_uf").filter(function(e){return e[0]&&e[0].trim()!==""&&e[1]>0;});
   if(ufsP7L.length) buildHBar(grid,"Positivacao por Estado (UF)","lojas com P7L por estado",ufsP7L);
 
-  // Grafico por UF — apenas quem recebeu P7L
-  var ufsP7L = countKey(rowsComP7L,"_uf").filter(function(e){return e[0]&&e[0].trim()!==""&&e[1]>0;});
-  if(ufsP7L.length) buildHBar(grid,"Positivacao por Estado (UF)","lojas com P7L por estado",ufsP7L);
   var priority=[COLS.recebeu,COLS.modelo,COLS.exposto,COLS.sku].filter(function(i){return i>=0;});
   var rest=ALL_HEADERS.map(function(_,i){return i;}).filter(function(i){return priority.indexOf(i)<0;});
   var ord=priority.concat(rest).slice(0,9);
@@ -334,7 +331,7 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
           rede:  (r[1]||"").trim(),
           nome:  (r[2]||"").trim(),
           cidade:(r[3]||"").trim(),
-          uf:    (r[4]||"").trim()
+          uf:    (r[4]||"").trim().replace(/\r/g,"")
         };
       });
     }
@@ -356,8 +353,8 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
       var info=lookup[copy[2]]||{nome:"",rede:""};
       copy._rede=info.rede;
       copy._nome=info.nome;
-      copy._uf=info.uf||"";
-      copy._cidade=info.cidade||"";
+      copy._uf=(info.uf||"").trim();
+      copy._cidade=(info.cidade||"").trim();
       return copy;
     });
 
