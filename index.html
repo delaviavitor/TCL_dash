@@ -206,19 +206,13 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
     // Build lookup por CNPJ limpo
     var lookup={};
     if(stores){
-      var sc={
-        cnpj: findCol(stores.headers,["cnpj"]),
-        nome: findCol(stores.headers,["descri","local","nome","loja","razao","fantasia"]),
-        rede: findCol(stores.headers,["bandeira","rede","chain","grupo"])
-      };
+      // Colunas fixas: 0=CNPJ, 1=Bandeira, 2=DESCRICAO LOCAL
       stores.rows.forEach(function(r){
-        if(sc.cnpj>=0){
-          var k=cleanCNPJ(r[sc.cnpj]);
-          if(k) lookup[k]={
-            nome: sc.nome>=0?(r[sc.nome]||""):"",
-            rede: sc.rede>=0?(r[sc.rede]||""):""
-          };
-        }
+        var k = cleanCNPJ(r[0]); // CNPJ col 0
+        if(k) lookup[k]={
+          rede: (r[1]||"").trim(),  // Bandeira col 1
+          nome: (r[2]||"").trim()   // DESCRICAO LOCAL col 2
+        };
       });
     }
 
