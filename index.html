@@ -232,13 +232,14 @@ function buildRedeCobertura(grid, redesP7L, cobLookup) {
   card.innerHTML='<div class="cctitle">Positivacao por Rede</div><div class="ccsub">SKU recebido vs total de lojas na cobertura</div>';
   var h=Math.max(260,labels.length*52+80);
   var nc=newCanvas(h);card.appendChild(nc.w);grid.appendChild(card);
+  // Dataset: total como fundo, positivadas em cima (stacked)
   charts.push(new Chart(nc.c,{
     type:"bar",
     data:{
       labels:labels,
       datasets:[
-        {label:"Total cobertura",data:total,backgroundColor:"rgba(0,0,0,0.10)",borderColor:"rgba(0,0,0,0.25)",borderWidth:1.5,borderRadius:4},
-        {label:"Com P7L",data:posit,backgroundColor:"#FF000099",borderColor:"#FF0000",borderWidth:1.5,borderRadius:4}
+        {label:"Total cobertura",data:total,backgroundColor:"rgba(0,0,0,0.08)",borderColor:"rgba(0,0,0,0.15)",borderWidth:1,borderRadius:4},
+        {label:"Com P7L",data:posit,backgroundColor:"#FF0000CC",borderColor:"#FF0000",borderWidth:1.5,borderRadius:4}
       ]
     },
     options:{
@@ -255,8 +256,8 @@ function buildRedeCobertura(grid, redesP7L, cobLookup) {
         }}}
       },
       scales:{
-        x:{grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},
-        y:{grid:{display:false},border:{display:false}}
+        x:{stacked:false,grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},
+        y:{stacked:true,grid:{display:false},border:{display:false}}
       }
     }
   }));
@@ -293,6 +294,10 @@ function render(rows){
   var cobLookup = window._cobLookup||{};
   var redesP7L = countKey(rowsComP7L,"_rede").filter(function(e){return e[1]>0;});
   if(redesP7L.length) buildRedeCobertura(grid, redesP7L, cobLookup);
+
+  // Grafico por UF — apenas quem recebeu P7L
+  var ufsP7L = countKey(rowsComP7L,"_uf").filter(function(e){return e[0]&&e[0].trim()!==""&&e[1]>0;});
+  if(ufsP7L.length) buildHBar(grid,"Positivacao por Estado (UF)","lojas com P7L por estado",ufsP7L);
 
   // Grafico por UF — apenas quem recebeu P7L
   var ufsP7L = countKey(rowsComP7L,"_uf").filter(function(e){return e[0]&&e[0].trim()!==""&&e[1]>0;});
