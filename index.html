@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard P7L</title>
+<title>TCL | Dashboard P7L</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F4F3EF;--surface:#FFF;--border:rgba(0,0,0,0.07);--border-md:rgba(0,0,0,0.13);--text:#18181A;--muted:#6E6E73;--accent:#FF0000;--green:#1D9E75;--green-bg:#E1F5EE;--red:#C0392B;--red-bg:#FDEDED;--amber:#B45309;--amber-bg:#FEF3C7;--radius:14px}
+:root{--bg:#F5F5F5;--surface:#FFF;--border:rgba(0,0,0,0.07);--border-md:rgba(0,0,0,0.15);--text:#1A1A1A;--muted:#6E6E73;--accent:#FF0000;--green:#1D9E75;--green-bg:#E1F5EE;--red:#C0392B;--red-bg:#FDEDED;--amber:#B45309;--amber-bg:#FEF3C7;--radius:10px}
 body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 36px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.header{background:#1A1A1A;border-bottom:none;padding:16px 36px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:38px;height:38px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo{width:38px;height:38px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center}
 .logo svg{width:22px;height:22px;fill:white}
-.bname{font-size:17px;font-weight:600;letter-spacing:-.3px}
-.bsub{font-size:12px;color:var(--muted);margin-top:1px}
-.badge{font-size:12px;font-weight:500;padding:5px 13px;border-radius:20px;background:var(--green-bg);color:var(--green);display:none;align-items:center;gap:6px}
+.bname{font-size:17px;font-weight:600;letter-spacing:-.3px;color:#FFF}
+.bsub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:1px}
+.badge{font-size:12px;font-weight:500;padding:5px 13px;border-radius:20px;background:rgba(255,255,255,0.1);color:#FFF;display:none;align-items:center;gap:6px}
 .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -28,17 +28,17 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min
 .eico{font-size:44px}.etitle{font-size:18px;font-weight:600}.emsg{font-size:14px;color:var(--muted);max-width:480px;line-height:1.6}
 .warn{background:var(--amber-bg);border:1px solid #F6D860;border-radius:10px;padding:12px 18px;font-size:13px;color:var(--amber);margin-bottom:20px;display:none}
 .content{display:none}
-.slabel{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
-.filterbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.slabel{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#FF0000;margin-bottom:14px;padding-left:10px;border-left:3px solid #FF0000}
+.filterbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;border-left:4px solid #FF0000}
 .fg{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
 .flabel{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
 select{appearance:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;border:1px solid var(--border-md);border-radius:8px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--text);cursor:pointer;width:100%}
-select:focus{outline:none;border-color:var(--accent)}
+select:focus{outline:none;border-color:#FF0000}
 .btn-clear{padding:8px 16px;background:transparent;border:1px solid var(--border-md);border-radius:8px;font-size:13px;font-family:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
 .btn-clear:hover{background:var(--red-bg);color:var(--red);border-color:var(--red)}
 .finfo{font-size:12px;color:#FF0000;font-weight:500;padding:6px 12px;background:#EEF3FD;border-radius:6px;border:1px solid #FFAAAA;display:none;align-items:center;gap:6px}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:28px}
-.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;border-top:3px solid #FF0000}
 .sclabel{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px}
 .scvalue{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1}
 .scsub{font-size:11px;color:var(--muted);margin-top:5px}
@@ -62,12 +62,56 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:last-child{border-bottom
 tbody td{padding:9px 16px;white-space:nowrap}
 .pill{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
 .py{background:var(--green-bg);color:var(--green)}.pn{background:var(--red-bg);color:var(--red)}.pr{background:#FFE5E5;color:#FF0000}
-.footer{border-top:1px solid var(--border);padding:14px 36px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
-.footer a{color:var(--accent);text-decoration:none}
+.footer{border-top:3px solid #FF0000;padding:14px 36px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);background:#1A1A1A}
+.footer a{color:#FF0000;text-decoration:none}.footer{color:rgba(255,255,255,0.5)}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--border-md);border-radius:3px}
 </style>
 </head>
 <body>
+
+<style>
+#login-screen{position:fixed;inset:0;background:#F4F3EF;display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:#FFF;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:40px;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.login-logo{width:48px;height:48px;background:#FF0000;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.login-logo svg{width:28px;height:28px;fill:white}
+.login-title{font-size:18px;font-weight:600;color:#18181A;letter-spacing:-.3px}
+.login-sub{font-size:13px;color:#6E6E73;margin-top:-12px}
+.login-input{width:100%;padding:10px 14px;border:1px solid rgba(0,0,0,0.13);border-radius:8px;font-size:14px;font-family:"DM Sans",sans-serif;outline:none;transition:border .15s}
+.login-input:focus{border-color:#FF0000}
+.login-btn{width:100%;padding:10px;background:#FF0000;color:#FFF;border:none;border-radius:8px;font-size:14px;font-weight:600;font-family:"DM Sans",sans-serif;cursor:pointer;transition:opacity .15s}
+.login-btn:hover{opacity:.85}
+.login-err{font-size:12px;color:#C0392B;display:none}
+</style>
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/></svg></div>
+    <div class="login-title">Dashboard P7L</div>
+    <div class="login-sub">Digite a senha para continuar</div>
+    <input class="login-input" type="password" id="pwd-input" placeholder="Senha" onkeydown="if(event.key==='Enter')checkPwd()"/>
+    <button class="login-btn" onclick="checkPwd()">Entrar</button>
+    <span class="login-err" id="pwd-err">Senha incorreta. Tente novamente.</span>
+  </div>
+</div>
+<script>
+function checkPwd(){
+  var pwd=document.getElementById("pwd-input").value;
+  if(pwd==="Ontradetcl123"){
+    document.getElementById("login-screen").style.display="none";
+    sessionStorage.setItem("tcl_auth","1");
+  } else {
+    document.getElementById("pwd-err").style.display="block";
+    document.getElementById("pwd-input").value="";
+    document.getElementById("pwd-input").focus();
+  }
+}
+if(sessionStorage.getItem("tcl_auth")==="1"){
+  document.addEventListener("DOMContentLoaded",function(){
+    var s=document.getElementById("login-screen");
+    if(s)s.style.display="none";
+  });
+}
+</script>
+
 <header class="header">
   <div class="brand">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/></svg></div>
@@ -171,16 +215,30 @@ function render(rows){
   var total=rows.length; updateFinfo();
   var sh='<div class="sc blue"><div class="sclabel">Total</div><div class="scvalue">'+total.toLocaleString("pt-BR")+'</div><div class="scsub">'+(fRede||fModelo||fSku?"filtrado de "+ALL_ROWS.length:ALL_HEADERS.length+" colunas")+'</div></div>';
   if(COLS.recebeu>=0){var e1=countCol(rows,COLS.recebeu),s1=e1.find(function(x){return x[0].toLowerCase().indexOf("sim")>=0;}),p1=s1?pct(s1[1],total):0;sh+='<div class="sc '+(p1>=50?"green":"red")+'"><div class="sclabel">Lojas com P7L</div><div class="scvalue">'+p1+'%</div><div class="scsub">'+(s1?s1[1]:0)+' de '+total+'</div></div>';}
-  if(COLS.exposto>=0){var e2=countCol(rows,COLS.exposto),s2=e2.find(function(x){return x[0].toLowerCase().indexOf("sim")>=0;}),p2=s2?pct(s2[1],total):0;sh+='<div class="sc '+(p2>=50?"green":"amber")+'"><div class="sclabel">Modelo exposto</div><div class="scvalue">'+p2+'%</div><div class="scsub">'+(s2?s2[1]:0)+' de '+total+'</div></div>';}
+  if(COLS.exposto>=0){
+    // Base = lojas que receberam o P7L (sim)
+    var baseRows = COLS.recebeu>=0 ? rows.filter(function(r){return (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;}) : rows;
+    var baseTotal = baseRows.length;
+    var e2=countCol(rows,COLS.exposto),s2=e2.find(function(x){return x[0].toLowerCase().indexOf("sim")>=0;});
+    var p2=s2&&baseTotal>0?pct(s2[1],baseTotal):0;
+    sh+='<div class="sc '+(p2>=50?"green":"amber")+'"><div class="sclabel">Modelo exposto</div><div class="scvalue">'+p2+'%</div><div class="scsub">'+(s2?s2[1]:0)+' de '+baseTotal+' que receberam</div></div>';
+  }
   var redes=countKey(rows,"_rede");
   if(redes.length)sh+='<div class="sc purple"><div class="sclabel">Redes</div><div class="scvalue">'+redes.length+'</div><div class="scsub">identificadas</div></div>';
   document.getElementById("strip").innerHTML=sh;
   destroyCharts();var grid=document.getElementById("cgrid");grid.innerHTML="";
   if(COLS.recebeu>=0)buildDonut(grid,"A loja ja recebeu o P7L?",total+" respostas",countCol(rows,COLS.recebeu),total);
   if(COLS.modelo>=0) buildHBar(grid,"Qual o MODELO do P7L recebido?","por quantidade",countCol(rows,COLS.modelo));
-  if(COLS.exposto>=0)buildDonut(grid,"O modelo esta exposto em loja?",total+" respostas",countCol(rows,COLS.exposto),total);
+  if(COLS.exposto>=0){
+    var baseR = COLS.recebeu>=0 ? rows.filter(function(r){return (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;}) : rows;
+    var baseT = baseR.length;
+    buildDonut(grid,"O modelo esta exposto em loja?",baseT+" lojas com P7L",countCol(rows,COLS.exposto),baseT);
+  }
   if(COLS.sku>=0)    buildHBar(grid,"O SKU esta positivado em qual lugar?","por local",countCol(rows,COLS.sku));
-  if(redes.length)   buildHBar(grid,"Respostas por Rede","distribuicao de lojas",redes);
+  // Respostas por Rede — apenas quem recebeu P7L
+  var rowsComP7L = COLS.recebeu>=0 ? rows.filter(function(r){return (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;}) : rows;
+  var redesP7L = countKey(rowsComP7L,"_rede");
+  if(redesP7L.length) buildHBar(grid,"Respostas por Rede (SKU Recebido)","apenas lojas que receberam o P7L",redesP7L);
   var priority=[COLS.recebeu,COLS.modelo,COLS.exposto,COLS.sku].filter(function(i){return i>=0;});
   var rest=ALL_HEADERS.map(function(_,i){return i;}).filter(function(i){return priority.indexOf(i)<0;});
   var ord=priority.concat(rest).slice(0,9);
