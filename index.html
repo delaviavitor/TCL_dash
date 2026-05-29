@@ -249,7 +249,6 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
     document.getElementById("loading").style.display="none";
     document.getElementById("content").style.display="block";
     document.getElementById("badge").style.display="flex";
-    console.log("Lookup:",Object.keys(lookup).length,"Redes:",ALL_ROWS.filter(function(r){return r._rede;}).length);
     document.getElementById("bsub").textContent=ALL_ROWS.length+" respostas · "+Object.keys(lookup).length+" lojas";
     document.getElementById("lupdate").textContent="Atualizado: "+new Date().toLocaleString("pt-BR");
     render(ALL_ROWS);
