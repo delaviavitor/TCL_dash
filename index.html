@@ -215,53 +215,37 @@ function updateFinfo(){var p=[];if(fUf)p.push("UF: "+fUf);if(fRede)p.push("Rede:
 
 
 function buildRedeCobertura(grid, redesP7L, cobLookup) {
-  // Merge: para cada rede com P7L, pega o total do cobLookup
   var labels=[], posit=[], total=[];
   redesP7L.forEach(function(e){
     var rede=e[0], p=e[1], t=cobLookup[rede]||0;
-    if(p>0){
-      labels.push(rede);
-      posit.push(p);
-      total.push(t);
-    }
+    if(p>0){ labels.push(rede); posit.push(p); total.push(t); }
   });
-  // Redes com 0 positivadas nao aparecem
-
   if(!labels.length) return;
+
   var card=document.createElement("div");card.className="cc";
   card.innerHTML='<div class="cctitle">Positivacao por Rede</div><div class="ccsub">SKU recebido vs total de lojas na cobertura</div>';
-  var h=Math.max(260,labels.length*52+80);
-  var nc=newCanvas(h);card.appendChild(nc.w);grid.appendChild(card);
-  // Dataset: total como fundo, positivadas em cima (stacked)
-  charts.push(new Chart(nc.c,{
-    type:"bar",
-    data:{
-      labels:labels,
-      datasets:[
-        {label:"Total cobertura",data:total,backgroundColor:"rgba(0,0,0,0.10)",borderColor:"rgba(0,0,0,0.15)",borderWidth:1,borderRadius:4,barPercentage:0.85,categoryPercentage:0.8},
-        {label:"Com P7L",data:posit,backgroundColor:"#FF0000CC",borderColor:"#FF0000",borderWidth:1.5,borderRadius:4,barPercentage:0.5,categoryPercentage:0.8}
-      ]
-    },
-    options:{
-      indexAxis:"y",responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
-        tooltip:{callbacks:{label:function(ctx){
-          if(ctx.datasetIndex===1){
-            var t2=total[ctx.dataIndex];
-            var pct2=t2>0?Math.round(ctx.raw/t2*100):0;
-            return " "+ctx.raw+" positivadas ("+pct2+"% de "+t2+")";
-          }
-          return " "+ctx.raw+" lojas na cobertura";
-        }}}
-      },
-      scales:{
-        x:{grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},
-        y:{grid:{display:false},border:{display:false}}
-      }
-    }
-  }));
+
+  var wrap=document.createElement("div");
+  wrap.style.cssText="display:flex;flex-direction:column;gap:12px;margin-top:4px";
+
+  labels.forEach(function(rede,i){
+    var p=posit[i], t=total[i];
+    var pct=t>0?Math.round(p/t*100):0;
+    var row=document.createElement("div");
+    row.innerHTML=
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">'+
+        '<span style="font-weight:500;color:var(--text)">'+rede+'</span>'+
+        '<span style="color:var(--muted)">'+p+(t>0?' de '+t:'')+'&nbsp;<strong style="color:#FF0000">'+pct+'%</strong></span>'+
+      '</div>'+
+      '<div style="background:rgba(0,0,0,0.08);border-radius:6px;height:10px;overflow:hidden">'+
+        '<div style="background:#FF0000;width:'+pct+'%;height:100%;border-radius:6px;transition:width .4s"></div>'+
+      '</div>';
+    wrap.appendChild(row);
+  });
+  card.appendChild(wrap);
+  grid.appendChild(card);
 }
+
 
 function render(rows){
   var total=rows.length; updateFinfo();
