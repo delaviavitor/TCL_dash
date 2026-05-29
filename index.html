@@ -206,12 +206,12 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
     // Build lookup por CNPJ limpo
     var lookup={};
     if(stores){
-      // Colunas fixas: 0=CNPJ, 1=Bandeira, 2=DESCRICAO LOCAL
+      // Colunas fixas: 0=CNPJ, 1=Bandeira, 2+=DESCRICAO LOCAL
       stores.rows.forEach(function(r){
         var k = cleanCNPJ(r[0]); // CNPJ col 0
         if(k) lookup[k]={
-          rede: (r[1]||"").trim(),  // Bandeira col 1
-          nome: (r[2]||"").trim()   // DESCRICAO LOCAL col 2
+          rede: (r[1]||"").trim(),                          // Bandeira col 1
+          nome: r.slice(2).join(" ").trim()                 // DESCRICAO LOCAL (pode ter virgulas)
         };
       });
     }
@@ -249,6 +249,7 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
     document.getElementById("loading").style.display="none";
     document.getElementById("content").style.display="block";
     document.getElementById("badge").style.display="flex";
+    console.log("Lookup:",Object.keys(lookup).length,"Redes:",ALL_ROWS.filter(function(r){return r._rede;}).length);
     document.getElementById("bsub").textContent=ALL_ROWS.length+" respostas · "+Object.keys(lookup).length+" lojas";
     document.getElementById("lupdate").textContent="Atualizado: "+new Date().toLocaleString("pt-BR");
     render(ALL_ROWS);
