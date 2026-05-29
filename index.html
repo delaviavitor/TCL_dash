@@ -128,6 +128,7 @@ if(sessionStorage.getItem("tcl_auth")==="1"){
   <div class="content" id="content">
     <div class="warn" id="warn"></div>
     <div class="filterbar">
+      <div class="fg"><div class="flabel">UF</div><select id="f-uf"><option value="">Todos os estados</option></select></div>
       <div class="fg"><div class="flabel">Rede</div><select id="f-rede"><option value="">Todas as redes</option></select></div>
       <div class="fg"><div class="flabel">Modelo do SKU</div><select id="f-modelo"><option value="">Todos os modelos</option></select></div>
       <div class="fg"><div class="flabel">Onde esta positivado</div><select id="f-sku"><option value="">Todos os locais</option></select></div>
@@ -149,8 +150,9 @@ if(sessionStorage.getItem("tcl_auth")==="1"){
 </footer>
 <script>
 var PUB_ID = "2PACX-1vRx5uYHTCcznT3vZaMnXKeUcjXeANGTOErTQO0HtBkGsnodxfbaGugNWX8QBelUrrliVbc7EmjqXrd6";
-var URL_MAIN   = "https://docs.google.com/spreadsheets/d/e/"+PUB_ID+"/pub?output=csv&gid=637872340";
-var URL_STORES = "https://docs.google.com/spreadsheets/d/e/"+PUB_ID+"/pub?output=csv&gid=1098220595";
+var URL_MAIN      = "https://docs.google.com/spreadsheets/d/e/"+PUB_ID+"/pub?output=csv&gid=637872340";
+var URL_STORES    = "https://docs.google.com/spreadsheets/d/e/"+PUB_ID+"/pub?output=csv&gid=1098220595";
+var URL_COBERTURA = "https://docs.google.com/spreadsheets/d/e/"+PUB_ID+"/pub?output=csv&gid=275188410";
 var COLORS = ["#FF0000","#1D9E75","#D85A30","#7C3AED","#B45309","#0369A1","#BE185D","#065F46","#92400E","#C0392B"];
 var ci = 0;
 
@@ -205,11 +207,11 @@ function buildHBar(grid,title,sub,entries){
 }
 
 var ALL_ROWS=[],ALL_HEADERS=[],COLS={};
-var fRede="",fModelo="",fSku="";
+var fUf="",fRede="",fModelo="",fSku="";
 function getFiltered(){return ALL_ROWS.filter(function(r){return(fRede===""||( r._rede||"")===fRede)&&(fModelo===""||COLS.modelo<0||(r[COLS.modelo]||"").trim()===fModelo)&&(fSku===""||COLS.sku<0||(r[COLS.sku]||"").trim()===fSku);});}
 function populateSel(id,entries){var s=document.getElementById(id);entries.forEach(function(e){var o=document.createElement("option");o.value=e[0];o.textContent=e[0]+" ("+e[1]+")";s.appendChild(o);});}
-function clearFilters(){fRede=fModelo=fSku="";["f-rede","f-modelo","f-sku"].forEach(function(id){document.getElementById(id).value="";});refresh();}
-function updateFinfo(){var p=[];if(fRede)p.push("Rede: "+fRede);if(fModelo)p.push("Modelo: "+fModelo);if(fSku)p.push("Local: "+fSku);var el=document.getElementById("finfo");el.style.display=p.length?"flex":"none";el.textContent=p.join(" · ");}
+function clearFilters(){fUf=fRede=fModelo=fSku="";["f-uf","f-rede","f-modelo","f-sku"].forEach(function(id){document.getElementById(id).value="";});refresh();}
+function updateFinfo(){var p=[];if(fUf)p.push("UF: "+fUf);if(fRede)p.push("Rede: "+fRede);if(fModelo)p.push("Modelo: "+fModelo);if(fSku)p.push("Local: "+fSku);var el=document.getElementById("finfo");el.style.display=p.length?"flex":"none";el.textContent=p.join(" · ");}
 
 function render(rows){
   var total=rows.length; updateFinfo();
@@ -225,6 +227,21 @@ function render(rows){
   }
   var redes=countKey(rows,"_rede");
   if(redes.length)sh+='<div class="sc purple"><div class="sclabel">Redes</div><div class="scvalue">'+redes.length+'</div><div class="scsub">identificadas</div></div>';
+
+  // Cobertura cards por rede
+  var cobLookup = window._cobLookup||{};
+  var redesComMeta = Object.keys(cobLookup);
+  if(redesComMeta.length){
+    redesComMeta.forEach(function(rede){
+      var total = cobLookup[rede];
+      var posit = rows.filter(function(r){
+        return (r._rede||"")=== rede && COLS.recebeu>=0 && (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;
+      }).length;
+      var p = total>0?Math.round(posit/total*100):0;
+      var cor = p>=50?"green":p>=25?"amber":"red";
+      sh+='<div class="sc '+cor+'"><div class="sclabel">'+rede+'</div><div class="scvalue">'+p+'%</div><div class="scsub">'+posit+' de '+total+' lojas</div></div>';
+    });
+  }
   document.getElementById("strip").innerHTML=sh;
   destroyCharts();var grid=document.getElementById("cgrid");grid.innerHTML="";
   if(COLS.recebeu>=0)buildDonut(grid,"A loja ja recebeu o P7L?",total+" respostas",countCol(rows,COLS.recebeu),total);
@@ -256,21 +273,33 @@ function refresh(){render(getFiltered());}
 
 // Carrega as duas abas em paralelo
 document.getElementById("ltxt").textContent="Carregando dados...";
-Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return null;})])
+Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return null;}), fetchCSV(URL_COBERTURA).catch(function(){return null;})])
   .then(function(results){
-    var main=results[0], stores=results[1];
+    var main=results[0], stores=results[1], cobertura=results[2];
     ALL_HEADERS=main.headers;
 
     // Build lookup por CNPJ limpo
     var lookup={};
     if(stores){
-      // Colunas fixas: 0=CNPJ, 1=Bandeira, 2+=DESCRICAO LOCAL
+      // Colunas: 0=CNPJ, 1=Bandeira, 2=DESCRICAO LOCAL, 3=UF, 4=Cidade
       stores.rows.forEach(function(r){
-        var k = cleanCNPJ(r[0]); // CNPJ col 0
+        var k = cleanCNPJ(r[0]);
         if(k) lookup[k]={
-          rede: (r[1]||"").trim(),                          // Bandeira col 1
-          nome: r.slice(2).join(" ").trim()                 // DESCRICAO LOCAL (pode ter virgulas)
+          rede: (r[1]||"").trim(),
+          nome: (r[2]||"").trim(),
+          uf:   (r[3]||"").trim(),
+          cidade:(r[4]||"").trim()
         };
+      });
+    }
+
+    // Cobertura lookup: rede -> total lojas
+    var cobLookup={};
+    if(cobertura){
+      cobertura.rows.forEach(function(r){
+        var rede=(r[0]||"").trim();
+        var total=parseInt((r[1]||"0").replace(/[^0-9]/g,""),10);
+        if(rede&&total) cobLookup[rede]=total;
       });
     }
 
@@ -281,6 +310,8 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
       var info=lookup[copy[2]]||{nome:"",rede:""};
       copy._rede=info.rede;
       copy._nome=info.nome;
+      copy._uf=info.uf||"";
+      copy._cidade=info.cidade||"";
       return copy;
     });
 
@@ -296,13 +327,16 @@ Promise.all([fetchCSV(URL_MAIN), fetchCSV(URL_STORES).catch(function(){return nu
       w.textContent="Aviso: aba de lojas nao carregou. Filtro de Rede indisponivel.";
     }
 
+    populateSel("f-uf",    countKey(ALL_ROWS,"_uf"));
     populateSel("f-rede",   countKey(ALL_ROWS,"_rede"));
     if(COLS.modelo>=0) populateSel("f-modelo", countCol(ALL_ROWS,COLS.modelo));
     if(COLS.sku>=0)    populateSel("f-sku",    countCol(ALL_ROWS,COLS.sku));
 
+    document.getElementById("f-uf").addEventListener("change",function(){fUf=this.value;refresh();});
     document.getElementById("f-rede").addEventListener("change",function(){fRede=this.value;refresh();});
     document.getElementById("f-modelo").addEventListener("change",function(){fModelo=this.value;refresh();});
     document.getElementById("f-sku").addEventListener("change",function(){fSku=this.value;refresh();});
+    window._cobLookup = cobLookup;
 
     document.getElementById("loading").style.display="none";
     document.getElementById("content").style.display="block";
