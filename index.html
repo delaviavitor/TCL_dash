@@ -225,14 +225,7 @@ function buildRedeCobertura(grid, redesP7L, cobLookup) {
       total.push(t);
     }
   });
-  // Also add redes that are in cobLookup but not in redesP7L (0 positivadas)
-  Object.keys(cobLookup).forEach(function(rede){
-    if(labels.indexOf(rede)<0 && cobLookup[rede]>0){
-      labels.push(rede);
-      posit.push(0);
-      total.push(cobLookup[rede]);
-    }
-  });
+  // Redes com 0 positivadas nao aparecem
 
   if(!labels.length) return;
   var card=document.createElement("div");card.className="cc";
@@ -294,8 +287,9 @@ function render(rows){
     buildDonut(grid,"O modelo esta exposto em loja?",baseT+" lojas com P7L",countCol(rows,COLS.exposto),baseT);
   }
   if(COLS.sku>=0)    buildHBar(grid,"O SKU esta positivado em qual lugar?","por local",countCol(rows,COLS.sku));
-  // Respostas por Rede — barras duplas: positivadas vs total cobertura
+  // Lojas que receberam P7L — usado em varios graficos
   var rowsComP7L = COLS.recebeu>=0 ? rows.filter(function(r){return (r[COLS.recebeu]||"").toLowerCase().indexOf("sim")>=0;}) : rows;
+  // Respostas por Rede — barras duplas: positivadas vs total cobertura
   var cobLookup = window._cobLookup||{};
   var redesP7L = countKey(rowsComP7L,"_rede").filter(function(e){return e[1]>0;});
   if(redesP7L.length) buildRedeCobertura(grid, redesP7L, cobLookup);
