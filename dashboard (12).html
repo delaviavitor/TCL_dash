@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard P7L</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F4F3EF;--surface:#FFF;--border:rgba(0,0,0,0.07);--border-md:rgba(0,0,0,0.13);--text:#18181A;--muted:#6E6E73;--accent:#1A56DB;--green:#1D9E75;--green-bg:#E1F5EE;--red:#C0392B;--red-bg:#FDEDED;--amber:#B45309;--amber-bg:#FEF3C7;--radius:14px}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 36px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo svg{width:22px;height:22px;fill:white}
+.bname{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.bsub{font-size:12px;color:var(--muted);margin-top:1px}
+.badge{font-size:12px;font-weight:500;padding:5px 13px;border-radius:20px;background:var(--green-bg);color:var(--green);display:none;align-items:center;gap:6px}
+.dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.main{padding:28px 36px;max-width:1300px;margin:0 auto}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;gap:14px}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+.ltxt{font-size:14px;color:var(--muted)}
+.errbox{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;gap:10px;text-align:center}
+.eico{font-size:44px}.etitle{font-size:18px;font-weight:600}.emsg{font-size:14px;color:var(--muted);max-width:480px;line-height:1.6}
+.content{display:none}
+.slabel{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.filterbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.fg{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
+.flabel{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+select{appearance:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;border:1px solid var(--border-md);border-radius:8px;padding:8px 32px 8px 12px;font-size:13px;font-family:inherit;color:var(--text);cursor:pointer;width:100%}
+select:focus{outline:none;border-color:var(--accent)}
+.btn-clear{padding:8px 16px;background:transparent;border:1px solid var(--border-md);border-radius:8px;font-size:13px;font-family:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
+.btn-clear:hover{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.finfo{font-size:12px;color:var(--accent);font-weight:500;padding:6px 12px;background:#EEF3FD;border-radius:6px;border:1px solid #C7D9FB;display:none;align-items:center;gap:6px}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:28px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.sclabel{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px}
+.scvalue{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1}
+.scsub{font-size:11px;color:var(--muted);margin-top:5px}
+.sc.green .scvalue{color:var(--green)}.sc.red .scvalue{color:var(--red)}.sc.amber .scvalue{color:var(--amber)}.sc.blue .scvalue{color:var(--accent)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:28px}
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px}
+.cctitle{font-size:14px;font-weight:600;margin-bottom:3px}
+.ccsub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.cwrap{position:relative}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:14px;font-size:12px;color:var(--muted)}
+.legitem{display:flex;align-items:center;gap:5px}
+.legdot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
+.thd{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.thdtxt{font-size:14px;font-weight:600}
+.rcnt{font-size:12px;color:var(--muted);background:var(--bg);padding:4px 10px;border-radius:20px}
+.twrap{overflow-x:auto;max-height:340px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:9px 16px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border)}tbody tr:last-child{border-bottom:none}tbody tr:hover{background:var(--bg)}
+tbody td{padding:9px 16px;white-space:nowrap}
+.pill{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+.py{background:var(--green-bg);color:var(--green)}.pn{background:var(--red-bg);color:var(--red)}
+.footer{border-top:1px solid var(--border);padding:14px 36px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.footer a{color:var(--accent);text-decoration:none}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--border-md);border-radius:3px}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/></svg></div>
+    <div><div class="bname">Dashboard P7L</div><div class="bsub" id="bsub">Carregando...</div></div>
+  </div>
+  <div class="badge" id="badge"><span class="dot"></span>Dados ao vivo</div>
+</header>
+<main class="main">
+  <div class="loading" id="loading"><div class="spinner"></div><div class="ltxt">Buscando dados...</div></div>
+  <div class="errbox" id="errbox">
+    <div class="eico">&#9888;</div><div class="etitle">Erro ao carregar</div>
+    <div class="emsg" id="emsg"></div>
+  </div>
+  <div class="content" id="content">
+    <div class="filterbar">
+      <div class="fg"><div class="flabel">Modelo do SKU</div><select id="f-modelo"><option value="">Todos os modelos</option></select></div>
+      <div class="fg"><div class="flabel">Onde esta positivado</div><select id="f-sku"><option value="">Todos os locais</option></select></div>
+      <button class="btn-clear" onclick="clearFilters()">Limpar filtros</button>
+      <div class="finfo" id="finfo"></div>
+    </div>
+    <div class="slabel">Resumo</div><div class="strip" id="strip"></div>
+    <div class="slabel">Analise por pergunta</div><div class="cgrid" id="cgrid"></div>
+    <div class="slabel">Dados completos</div>
+    <div class="tcard">
+      <div class="thd"><span class="thdtxt">Respostas</span><span class="rcnt" id="rcnt">-</span></div>
+      <div class="twrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </div>
+  </div>
+</main>
+<footer class="footer">
+  <span>Fonte: <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRx5uYHTCcznT3vZaMnXKeUcjXeANGTOErTQO0HtBkGsnodxfbaGugNWX8QBelUrrliVbc7EmjqXrd6/pubhtml" target="_blank">Google Sheets</a></span>
+  <span id="lupdate"></span>
+</footer>
+<script>
+// CSV da planilha publicada — funciona com CORS de qualquer HTTPS
+var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRx5uYHTCcznT3vZaMnXKeUcjXeANGTOErTQO0HtBkGsnodxfbaGugNWX8QBelUrrliVbc7EmjqXrd6/pub?output=csv&gid=637872340";
+
+var COLORS = ["#1A56DB","#1D9E75","#D85A30","#7C3AED","#B45309","#0369A1","#BE185D","#065F46","#92400E","#C0392B"];
+var ci = 0;
+
+function loadCSV(url) {
+  return fetch(url, {redirect:"follow"})
+    .then(function(r){
+      if(!r.ok) throw new Error("HTTP "+r.status+" ao carregar planilha.");
+      return r.text();
+    })
+    .then(function(text){
+      if(text.trim().startsWith("<")) throw new Error("Planilha retornou HTML. Verifique se ela esta publicada na web.");
+      var lines = text.trim().split("\n");
+      var headers = parseRow(lines[0]);
+      var rows = lines.slice(1).map(parseRow).filter(function(r){return r.some(function(c){return c.trim()!=="";});});
+      return {headers:headers, rows:rows};
+    });
+}
+
+function parseRow(row) {
+  var out=[],cur="",q=false;
+  for(var i=0;i<row.length;i++){
+    var ch=row[i];
+    if(ch==='"'){q=!q;continue;}
+    if(ch===","&&!q){out.push(cur.trim());cur="";continue;}
+    cur+=ch;
+  }
+  out.push(cur.trim());
+  return out;
+}
+
+function findCol(h,kws){ return h.findIndex(function(x){ return kws.some(function(k){ return x.toLowerCase().indexOf(k.toLowerCase())>=0; }); }); }
+function isEmpty(v){ v=(v||"").trim(); return !v||v==="(sem resposta)"||v.toLowerCase()==="n/a"||v==="-"; }
+function countCol(rows,idx){ var m={}; rows.forEach(function(r){var v=(r[idx]||"").trim();if(!isEmpty(v))m[v]=(m[v]||0)+1;}); return Object.entries(m).sort(function(a,b){return b[1]-a[1];}); }
+function pct(n,t){ return Math.round(n/t*100); }
+function colorFor(label,idx){ var l=(label||"").toLowerCase(); if(l.indexOf("sim")>=0)return"#1D9E75"; if(l.indexOf("não")>=0||l.indexOf("nao")>=0)return"#C0392B"; return COLORS[idx%COLORS.length]; }
+function newCanvas(h){ var w=document.createElement("div");w.className="cwrap";w.style.height=(h||240)+"px";var c=document.createElement("canvas");c.id="c"+(ci++);w.appendChild(c);return{w:w,c:c}; }
+
+Chart.defaults.font.family='"DM Sans",sans-serif'; Chart.defaults.font.size=12; Chart.defaults.color="#6E6E73";
+var charts=[];
+function destroyCharts(){charts.forEach(function(c){try{c.destroy();}catch(e){}});charts=[];}
+
+function buildDonut(grid,title,sub,entries,total){
+  if(!entries.length)return;
+  var card=document.createElement("div");card.className="cc";
+  card.innerHTML='<div class="cctitle">'+title+'</div><div class="ccsub">'+sub+'</div>';
+  var colors=entries.map(function(e,i){return colorFor(e[0],i);});
+  var leg=document.createElement("div");leg.className="leg";
+  entries.forEach(function(e,i){leg.innerHTML+='<span class="legitem"><span class="legdot" style="background:'+colors[i]+'"></span>'+e[0]+': <strong>'+e[1]+'</strong> ('+pct(e[1],total)+'%)</span>';});
+  card.appendChild(leg);var nc=newCanvas(200);card.appendChild(nc.w);grid.appendChild(card);
+  charts.push(new Chart(nc.c,{type:"doughnut",data:{labels:entries.map(function(e){return e[0];}),datasets:[{data:entries.map(function(e){return e[1];}),backgroundColor:colors,borderColor:"#fff",borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:"65%",plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return" "+ctx.label+": "+ctx.raw+" ("+pct(ctx.raw,total)+"%)";}}}}}}));
+}
+function buildHBar(grid,title,sub,entries){
+  if(!entries.length)return;
+  var sl=entries.slice(0,14);
+  var card=document.createElement("div");card.className="cc";
+  card.innerHTML='<div class="cctitle">'+title+'</div><div class="ccsub">'+sub+'</div>';
+  var nc=newCanvas(Math.max(220,sl.length*42+60));card.appendChild(nc.w);grid.appendChild(card);
+  charts.push(new Chart(nc.c,{type:"bar",data:{labels:sl.map(function(e){return e[0];}),datasets:[{data:sl.map(function(e){return e[1];}),backgroundColor:COLORS.slice(0,sl.length).map(function(c){return c+"CC";}),borderColor:COLORS.slice(0,sl.length),borderWidth:1.5,borderRadius:5}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return" "+ctx.raw+" respostas";}}}},scales:{x:{grid:{color:"rgba(0,0,0,0.04)"},border:{display:false},ticks:{precision:0}},y:{grid:{display:false},border:{display:false}}}}}));
+}
+
+var ALL_ROWS=[],ALL_HEADERS=[],COLS={};
+var fModelo="",fSku="";
+function getFiltered(){return ALL_ROWS.filter(function(r){return(fModelo===""||COLS.modelo<0||(r[COLS.modelo]||"").trim()===fModelo)&&(fSku===""||COLS.sku<0||(r[COLS.sku]||"").trim()===fSku);});}
+function populateSel(id,entries){var s=document.getElementById(id);entries.forEach(function(e){var o=document.createElement("option");o.value=e[0];o.textContent=e[0]+" ("+e[1]+")";s.appendChild(o);});}
+function clearFilters(){fModelo=fSku="";document.getElementById("f-modelo").value="";document.getElementById("f-sku").value="";refresh();}
+function updateFinfo(){var p=[];if(fModelo)p.push("Modelo: "+fModelo);if(fSku)p.push("Local: "+fSku);var el=document.getElementById("finfo");el.style.display=p.length?"flex":"none";el.textContent=p.join(" · ");}
+
+function render(rows){
+  var total=rows.length; updateFinfo();
+  var sh='<div class="sc blue"><div class="sclabel">Total</div><div class="scvalue">'+total.toLocaleString("pt-BR")+'</div><div class="scsub">'+(fModelo||fSku?"filtrado de "+ALL_ROWS.length:ALL_HEADERS.length+" colunas")+'</div></div>';
+  if(COLS.recebeu>=0){var e1=countCol(rows,COLS.recebeu),s1=e1.find(function(x){return x[0].toLowerCase().indexOf("sim")>=0;}),p1=s1?pct(s1[1],total):0;sh+='<div class="sc '+(p1>=50?"green":"red")+'"><div class="sclabel">Lojas com P7L</div><div class="scvalue">'+p1+'%</div><div class="scsub">'+(s1?s1[1]:0)+' de '+total+'</div></div>';}
+  if(COLS.exposto>=0){var e2=countCol(rows,COLS.exposto),s2=e2.find(function(x){return x[0].toLowerCase().indexOf("sim")>=0;}),p2=s2?pct(s2[1],total):0;sh+='<div class="sc '+(p2>=50?"green":"amber")+'"><div class="sclabel">Modelo exposto</div><div class="scvalue">'+p2+'%</div><div class="scsub">'+(s2?s2[1]:0)+' de '+total+'</div></div>';}
+  if(COLS.modelo>=0){sh+='<div class="sc amber"><div class="sclabel">Modelos distintos</div><div class="scvalue">'+countCol(rows,COLS.modelo).length+'</div><div class="scsub">variacoes</div></div>';}
+  document.getElementById("strip").innerHTML=sh;
+  destroyCharts();var grid=document.getElementById("cgrid");grid.innerHTML="";
+  if(COLS.recebeu>=0)buildDonut(grid,"A loja ja recebeu o P7L?",total+" respostas",countCol(rows,COLS.recebeu),total);
+  if(COLS.modelo>=0) buildHBar(grid,"Qual o MODELO do P7L recebido?","por quantidade",countCol(rows,COLS.modelo));
+  if(COLS.exposto>=0)buildDonut(grid,"O modelo esta exposto em loja?",total+" respostas",countCol(rows,COLS.exposto),total);
+  if(COLS.sku>=0)    buildHBar(grid,"O SKU esta positivado em qual lugar?","por local",countCol(rows,COLS.sku));
+  var priority=[COLS.recebeu,COLS.modelo,COLS.exposto,COLS.sku].filter(function(i){return i>=0;});
+  var rest=ALL_HEADERS.map(function(_,i){return i;}).filter(function(i){return priority.indexOf(i)<0;});
+  var ord=priority.concat(rest).slice(0,10);
+  document.getElementById("rcnt").textContent=rows.length.toLocaleString("pt-BR")+" respostas";
+  document.getElementById("thead").innerHTML="<tr>"+ord.map(function(i){return"<th>"+ALL_HEADERS[i]+"</th>";}).join("")+"</tr>";
+  var yes=["sim","yes"],no=["nao","não","no"];
+  document.getElementById("tbody").innerHTML=rows.slice(0,400).map(function(r){
+    return"<tr>"+ord.map(function(i){var v=r[i]||"",l=v.toLowerCase(),cls="";if(yes.some(function(w){return l===w||l.indexOf(w+" ")===0;}))cls="pill py";else if(no.some(function(w){return l===w||l.indexOf(w+" ")===0;}))cls="pill pn";return"<td>"+(cls?'<span class="'+cls+'">'+v+"</span>":v)+"</td>";}).join("")+"</tr>";
+  }).join("");
+}
+function refresh(){render(getFiltered());}
+
+loadCSV(CSV_URL).then(function(data){
+  ALL_HEADERS=data.headers; ALL_ROWS=data.rows;
+  COLS={recebeu:findCol(ALL_HEADERS,["recebeu","p7l","ja recebeu"]),modelo:findCol(ALL_HEADERS,["modelo","model"]),exposto:findCol(ALL_HEADERS,["exposto","exposicao","exposta"]),sku:findCol(ALL_HEADERS,["sku","positivado","lugar","local"])};
+  if(COLS.modelo>=0)populateSel("f-modelo",countCol(ALL_ROWS,COLS.modelo));
+  if(COLS.sku>=0)   populateSel("f-sku",   countCol(ALL_ROWS,COLS.sku));
+  document.getElementById("f-modelo").addEventListener("change",function(){fModelo=this.value;refresh();});
+  document.getElementById("f-sku").addEventListener("change",function(){fSku=this.value;refresh();});
+  document.getElementById("loading").style.display="none";
+  document.getElementById("content").style.display="block";
+  document.getElementById("badge").style.display="flex";
+  document.getElementById("bsub").textContent=ALL_ROWS.length+" respostas";
+  document.getElementById("lupdate").textContent="Atualizado: "+new Date().toLocaleString("pt-BR");
+  render(ALL_ROWS);
+}).catch(function(err){
+  document.getElementById("loading").style.display="none";
+  document.getElementById("errbox").style.display="flex";
+  document.getElementById("emsg").textContent=err.message;
+  document.getElementById("bsub").textContent="Erro ao carregar";
+});
+</script>
+</body>
+</html>
